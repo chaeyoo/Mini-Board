@@ -36,3 +36,32 @@
     transform: rotate(360deg);
   }
 }
+
+.FeelingEditor {
+  border: 1px solid gray;
+  text-align: center;
+  padding: 20px;
+}
+
+
+.FeelingEditor input, textarea {
+  margin-bottom: 20px;
+  width: 500px;
+  padding: 10px;
+}
+
+.FeelingEditor textarea {
+  height: 150px;
+}
+
+.FeelingEditor select {
+  width: 350px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.FeelingEditor button {
+  width: 500px;
+  padding: 10px;
+  cursor: pointer;
+}
