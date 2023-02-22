@@ -1,6 +1,8 @@
 import {useRef, useState} from "react";
 
-const FeelingEditor = () => {
+const FeelingEditor = (props) => {
+
+    const {onCreate} = props;
 
     const authorInput = useRef();
     const contentTextarea = useRef();
@@ -29,7 +31,13 @@ const FeelingEditor = () => {
             return;
         }
 
+        onCreate(diary.author, diary.content, diary.feeling)
         alert("저장성공")
+        setDiary({
+            author: "",
+            content: "",
+            feeling: 1
+        })
     }
     return (
         <div className="FeelingEditor">
