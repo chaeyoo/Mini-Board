@@ -1,8 +1,8 @@
 import './App.css';
 import FeelingEditor from "./FeelingEditor";
 import FeelingList from "./FeelingList.";
-import {useEffect, useRef, useState} from "react";
-// https://jsonplaceholder.typicode.com/comments
+import {useEffect, useMemo, useRef, useState} from "react";
+
 function App() {
     const [list, setList] = useState([]);
 
@@ -53,10 +53,28 @@ function App() {
             setList(initData)
         }
         fetchData();
-    }, [])
+    }, []);
+
+    // 일기 데이터의 길이가 변화하는 경우 말고는 통계 계산을 다시 할 필요가 없음
+    // memoization 기법 사용으로 연산 최적화!!
+    // useMemo로 memoization 하고 싶은 함수를 감싼다.
+    // useMemo는 콜백함수가 리턴하는 "값"을 리턴을 한다. 함수가 아님!!
+    const getDiaryAnalysis = useMemo(() => {
+        console.log("일기 분석 시작") // 2번 호출
+        const goodCnt = list.filter((el) => el.feeling >= 3).length;
+        const badCnt = (list.length - goodCnt);
+        const goodRatio = (goodCnt / list.length) * 100;
+        return {goodCnt, badCnt, goodRatio};
+    }, [list.length]);
+
+    const { goodCnt, badCnt, goodRatio } = getDiaryAnalysis;
+
   return (
     <div className="App">
         <FeelingEditor onCreate={onCreate}/>
+        <div>전체일기 수: {list.length}</div>
+        <div>좋은 날: {goodCnt} (비율: {goodRatio}%)</div>
+        <div>나쁜 날: {badCnt}</div>
         <FeelingList list={list} onRemove={onRemove} onUpdate={onUpdate}/>
     </div>
   );
