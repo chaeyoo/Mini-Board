@@ -1,37 +1,81 @@
 import './App.css';
 import FeelingEditor from "./FeelingEditor";
 import FeelingList from "./FeelingList.";
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import OptimizeTest from "./OptimizeTest";
-import OptimizeTest2 from "./OptimizeTest2";
+import {useCallback, useEffect, useMemo, useReducer, useRef} from "react";
+
+// state: 상태변화 일으키기 직전 상태
+// action: 어떤 상태 변화를 일으켜야 하는지 정보
+const reducer = (state, action) => {
+    switch (action.type) {
+        case 'INIT': {
+            return action.data
+        }
+            break;
+        case 'CREATE':
+            const createdAt = new Date().getTime();
+            const newItem = {
+                ...action.data, createdAt
+            }
+            return [newItem, ...state]
+            break;
+        case 'REMOVE':
+            return state.filter((el) => el.id !== action.idToDelete)
+            break;
+        case 'EDIT':
+            return state.map((val) =>
+                val.id === action.idToUpdate ? {...val, content: action.updatedContent} : val)
+            break;
+        default:
+            return state;
+
+    }
+}
 
 function App() {
-    const [list, setList] = useState([]);
-
+    // const [list, setList] = useState([]);
+    // reducer : 상태 변화를 처리하는 함수
+    const [list, dispatch] = useReducer(reducer, []);
     const feelingId = useRef(1);
     const onCreate = useCallback((author, content, feeling) => {
-        const createdAt = new Date().getTime();
-        const newItem = {
-            id: feelingId.current,
-            author,
-            content,
-            feeling,
-            createdAt,
-        }
+        dispatch({
+            type: "CREATE",
+            data: {
+                id: feelingId.current,
+                author,
+                content,
+                feeling,
+            }
+        })
+
+        // const createdAt = new Date().getTime();
+        // const newItem = {
+        //     id: feelingId.current,
+        //     author,
+        //     content,
+        //     feeling,
+        //     createdAt,
+        // }
         feelingId.current += 1;
-        setList((list) => [newItem, ...list])
-    },[]);
+        // setList((list) => [newItem, ...list])
+    }, []);
 
     const onRemove = useCallback((idToDelete) => {
-        setList(list => list.filter((el) => el.id !== idToDelete))
+        dispatch({
+            type: 'REMOVE', idToDelete
+        })
+        // setList(list => list.filter((el) => el.id !== idToDelete))
     }, [])
 
     const onUpdate = useCallback((idToUpdate, updatedContent) => {
-        setList((list) =>
-            list.map((val) =>
-                val.id === idToUpdate ? {...val, content: updatedContent} : val
-            )
-        )
+        console.log(idToUpdate, ":::",updatedContent)
+        dispatch({
+            type: 'EDIT', idToUpdate, updatedContent
+        })
+        // setList((list) =>
+        //     list.map((val) =>
+        //         val.id === idToUpdate ? {...val, content: updatedContent} : val
+        //     )
+        // )
     }, [])
 
     useEffect(() => {
@@ -39,18 +83,23 @@ function App() {
             const result = await fetch(
                 `https://jsonplaceholder.typicode.com/comments`
             ).then((res) => res.json())
-            console.log(result)
+            // console.log(result)
             const initData = result.slice(0, 20).map((v) => {
                 return {
                     author: v.email,
                     content: v.body,
                     feeling: Math.floor(Math.random() * 5) + 1,
                     createdAt: new Date().getTime(),
-                    id: feelingId.current ++,
+                    id: feelingId.current++,
                 }
             });
-            setList(initData)
+            // console.log(initData)
+            dispatch({
+                type: 'INIT', data: initData
+            })
+            // setList(initData)
         }
+
         fetchData();
     }, []);
 
@@ -66,19 +115,20 @@ function App() {
         return {goodCnt, badCnt, goodRatio};
     }, [list.length]);
 
-    const { goodCnt, badCnt, goodRatio } = getDiaryAnalysis;
+    const {goodCnt, badCnt, goodRatio} = getDiaryAnalysis;
 
-  return (
-    <div className="App">
-        {/*<OptimizeTest />*/}
-        {/*<OptimizeTest2 />*/}
-        <FeelingEditor onCreate={onCreate}/>
-        <div>전체일기 수: {list.length}</div>
-        <div>좋은 날: {goodCnt} (비율: {goodRatio}%)</div>
-        <div>나쁜 날: {badCnt}</div>
-        <FeelingList list={list} onRemove={onRemove} onUpdate={onUpdate}/>
-    </div>
-  );
+    return (
+        <div className="App">
+            {/*<OptimizeTest />*/}
+            {/*<OptimizeTest2 />*/}
+            <FeelingEditor onCreate={onCreate}/>
+            <div>전체일기 수: {list.length}</div>
+            <div>좋은 날: {goodCnt} (비율: {goodRatio}%)</div>
+            <div>나쁜 날: {badCnt}</div>
+            <FeelingList list={list} onRemove={onRemove} onUpdate={onUpdate}/>
+        </div>
+    );
+
 }
 
 export default App;

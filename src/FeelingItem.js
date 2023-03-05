@@ -24,6 +24,7 @@ const FeelingItem = (props) => {
             return;
         }
         if (window.confirm(`${item.id}번째 일기를 수정하시겠습니까?`)) {
+            console.log(item.id,":::", localContent)
             onUpdate(item.id, localContent);
             toggleIsEdit();
         }
