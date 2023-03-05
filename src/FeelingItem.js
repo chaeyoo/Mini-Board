@@ -1,7 +1,8 @@
-import {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 
 const FeelingItem = (props) => {
     const {item, onRemove, onUpdate} = props;
+    
     const [isEdit, setIsEdit] = useState(false);
     const [localContent, setLocalContent] = useState(item.content ? item.content : "");
     const localContentTextarea = useRef();
@@ -28,6 +29,9 @@ const FeelingItem = (props) => {
         }
     }
 
+    useEffect(() => {
+        console.log(item.id + '번째 일기 렌더')
+    })
     return (
         <div className="FeelingItem">
             <div className="info">
@@ -62,4 +66,4 @@ const FeelingItem = (props) => {
     )
 }
 
-export default FeelingItem;
+export default React.memo(FeelingItem);

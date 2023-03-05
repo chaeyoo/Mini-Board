@@ -1,13 +1,15 @@
 import './App.css';
 import FeelingEditor from "./FeelingEditor";
 import FeelingList from "./FeelingList.";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import OptimizeTest from "./OptimizeTest";
+import OptimizeTest2 from "./OptimizeTest2";
 
 function App() {
     const [list, setList] = useState([]);
 
     const feelingId = useRef(1);
-    const onCreate = (author, content, feeling) => {
+    const onCreate = useCallback((author, content, feeling) => {
         const createdAt = new Date().getTime();
         const newItem = {
             id: feelingId.current,
@@ -17,24 +19,21 @@ function App() {
             createdAt,
         }
         feelingId.current += 1;
-        setList([newItem, ...list])
-    }
-    
-    const onRemove = (idToDelete) => {
-        setList(list.filter((el) => el.id !== idToDelete))
-    }
+        setList((list) => [newItem, ...list])
+    },[]);
 
-    const onUpdate = (idToUpdate, updatedContent) => {
-        setList(
+    const onRemove = useCallback((idToDelete) => {
+        setList(list => list.filter((el) => el.id !== idToDelete))
+    }, [])
+
+    const onUpdate = useCallback((idToUpdate, updatedContent) => {
+        setList((list) =>
             list.map((val) =>
                 val.id === idToUpdate ? {...val, content: updatedContent} : val
             )
         )
-    }
+    }, [])
 
-    const getData = async() => {
-
-    }
     useEffect(() => {
         async function fetchData() {
             const result = await fetch(
@@ -60,7 +59,7 @@ function App() {
     // useMemo로 memoization 하고 싶은 함수를 감싼다.
     // useMemo는 콜백함수가 리턴하는 "값"을 리턴을 한다. 함수가 아님!!
     const getDiaryAnalysis = useMemo(() => {
-        console.log("일기 분석 시작") // 2번 호출
+        // console.log("일기 분석 시작") // 2번 호출
         const goodCnt = list.filter((el) => el.feeling >= 3).length;
         const badCnt = (list.length - goodCnt);
         const goodRatio = (goodCnt / list.length) * 100;
@@ -71,6 +70,8 @@ function App() {
 
   return (
     <div className="App">
+        {/*<OptimizeTest />*/}
+        {/*<OptimizeTest2 />*/}
         <FeelingEditor onCreate={onCreate}/>
         <div>전체일기 수: {list.length}</div>
         <div>좋은 날: {goodCnt} (비율: {goodRatio}%)</div>

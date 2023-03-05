@@ -1,9 +1,11 @@
-import {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 
 const FeelingEditor = (props) => {
 
     const {onCreate} = props;
-
+    // useEffect(() => {
+    //     console.log('DiaryEditor 렌더')
+    // })
     const authorInput = useRef();
     const contentTextarea = useRef();
     const [diary, setDiary]= useState({
@@ -31,7 +33,7 @@ const FeelingEditor = (props) => {
             return;
         }
 
-        onCreate(diary.author, diary.content, diary.feeling)
+        onCreate(diary.author, diary.content, diary.feeling);
         alert("저장성공")
         setDiary({
             author: "",
@@ -67,4 +69,4 @@ const FeelingEditor = (props) => {
     )
 }
 
-export default FeelingEditor;
+export default  React.memo(FeelingEditor);
