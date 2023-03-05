@@ -1,8 +1,10 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import {FeelingDispatchContext} from "./App";
 
 const FeelingItem = (props) => {
-    const {item, onRemove, onUpdate} = props;
-    
+    // const {item, onRemove, onUpdate} = props;
+    const {item} = props;
+    const {onRemove, onUpdate} = useContext(FeelingDispatchContext);
     const [isEdit, setIsEdit] = useState(false);
     const [localContent, setLocalContent] = useState(item.content ? item.content : "");
     const localContentTextarea = useRef();

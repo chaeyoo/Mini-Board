@@ -1,8 +1,10 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useContext, useEffect, useRef, useState} from "react";
+import {FeelingDispatchContext} from "./App";
 
-const FeelingEditor = (props) => {
+const FeelingEditor = () => {
 
-    const {onCreate} = props;
+    const {onCreate} = useContext(FeelingDispatchContext);
+    // const {onCreate} = props;
     // useEffect(() => {
     //     console.log('DiaryEditor 렌더')
     // })

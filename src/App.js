@@ -1,7 +1,7 @@
 import './App.css';
 import FeelingEditor from "./FeelingEditor";
 import FeelingList from "./FeelingList.";
-import {useCallback, useEffect, useMemo, useReducer, useRef} from "react";
+import React, {useCallback, useEffect, useMemo, useReducer, useRef} from "react";
 
 // state: 상태변화 일으키기 직전 상태
 // action: 어떤 상태 변화를 일으켜야 하는지 정보
@@ -22,8 +22,7 @@ const reducer = (state, action) => {
             return state.filter((el) => el.id !== action.idToDelete)
             break;
         case 'EDIT':
-            return state.map((val) =>
-                val.id === action.idToUpdate ? {...val, content: action.updatedContent} : val)
+            return state.map((val) => val.id === action.idToUpdate ? {...val, content: action.updatedContent} : val)
             break;
         default:
             return state;
@@ -31,6 +30,8 @@ const reducer = (state, action) => {
     }
 }
 
+export const FeelingStateContext = React.createContext();
+export const FeelingDispatchContext = React.createContext();
 function App() {
     // const [list, setList] = useState([]);
     // reducer : 상태 변화를 처리하는 함수
@@ -38,12 +39,8 @@ function App() {
     const feelingId = useRef(1);
     const onCreate = useCallback((author, content, feeling) => {
         dispatch({
-            type: "CREATE",
-            data: {
-                id: feelingId.current,
-                author,
-                content,
-                feeling,
+            type: "CREATE", data: {
+                id: feelingId.current, author, content, feeling,
             }
         })
 
@@ -67,7 +64,7 @@ function App() {
     }, [])
 
     const onUpdate = useCallback((idToUpdate, updatedContent) => {
-        console.log(idToUpdate, ":::",updatedContent)
+        console.log(idToUpdate, ":::", updatedContent)
         dispatch({
             type: 'EDIT', idToUpdate, updatedContent
         })
@@ -78,11 +75,13 @@ function App() {
         // )
     }, [])
 
+    // App 컴포넌트가 재생성 될 때, 아래 함수들이 재생성 되지 않도록 useMemo로 묶어주기
+    const memoizedDispatches = useMemo(() => {
+        return {onCreate, onRemove, onUpdate}
+    }, [])
     useEffect(() => {
         async function fetchData() {
-            const result = await fetch(
-                `https://jsonplaceholder.typicode.com/comments`
-            ).then((res) => res.json())
+            const result = await fetch(`https://jsonplaceholder.typicode.com/comments`).then((res) => res.json())
             // console.log(result)
             const initData = result.slice(0, 20).map((v) => {
                 return {
@@ -118,15 +117,22 @@ function App() {
     const {goodCnt, badCnt, goodRatio} = getDiaryAnalysis;
 
     return (
-        <div className="App">
-            {/*<OptimizeTest />*/}
-            {/*<OptimizeTest2 />*/}
-            <FeelingEditor onCreate={onCreate}/>
-            <div>전체일기 수: {list.length}</div>
-            <div>좋은 날: {goodCnt} (비율: {goodRatio}%)</div>
-            <div>나쁜 날: {badCnt}</div>
-            <FeelingList list={list} onRemove={onRemove} onUpdate={onUpdate}/>
-        </div>
+        <FeelingStateContext.Provider value={list}>
+            <FeelingDispatchContext.Provider value={memoizedDispatches}>
+                <div className="App">
+                    {/*<OptimizeTest />*/}
+                    {/*<OptimizeTest2 />*/}
+                    {/*<FeelingEditor onCreate={onCreate}/>*/}
+                    <FeelingEditor />
+                    <div>전체일기 수: {list.length}</div>
+                    <div>좋은 날: {goodCnt} (비율: {goodRatio}%)</div>
+                    <div>나쁜 날: {badCnt}</div>
+                    {/*<FeelingList list={list} onRemove={onRemove} onUpdate={onUpdate}/>*/}
+                    {/*<FeelingList onRemove={onRemove} onUpdate={onUpdate}/>*/}
+                    <FeelingList />
+                </div>
+            </FeelingDispatchContext.Provider>
+        </FeelingStateContext.Provider>
     );
 
 }
